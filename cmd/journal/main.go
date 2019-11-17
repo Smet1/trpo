@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"github.com/Smet1/trpo/internal/db"
 	"net/http"
 	"os"
 	"os/signal"
@@ -37,9 +38,15 @@ func main() {
 	}
 	log.WithField("config", cfg).Info("started with config")
 
+	conn, err := db.EnsureDBConn(cfg)
+	if err != nil {
+		log.WithError(err).Fatal("can't create db connection")
+	}
+
 	mux := chi.NewRouter()
 	mux.Use(middleware.NoCache)
 	mux.Use(logger.GetLoggerMiddleware(log))
+	mux.Use(db.GetDbConnMiddleware(conn))
 
 	server := http.Server{
 		Handler: mux,
