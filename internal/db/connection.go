@@ -37,7 +37,7 @@ func GetConnection(ctx context.Context) *sqlx.DB {
 
 func EnsureDBConn(config *config.Config) (*sqlx.DB, error) {
 	v := url.Values{}
-	v.Add("ssl-mode", config.DB.SSLMode)
+	v.Add("sslmode", config.DB.SSLMode)
 
 	p := url.URL{
 		Scheme:     config.DB.Database,

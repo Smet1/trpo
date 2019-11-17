@@ -8,6 +8,9 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/Smet1/trpo/internal/handlers"
+	"go.opencensus.io/plugin/ochttp"
+
 	"github.com/Smet1/trpo/internal/db"
 
 	"github.com/Smet1/trpo/internal/config"
@@ -48,6 +51,12 @@ func main() {
 	mux.Use(middleware.NoCache)
 	mux.Use(logger.GetLoggerMiddleware(log))
 	mux.Use(db.GetDbConnMiddleware(conn))
+
+	mux.Route("/api/users", func(r chi.Router) {
+		r.Post("/", (&ochttp.Handler{
+			Handler: ochttp.WithRouteTag(http.HandlerFunc(handlers.CreateUser), "/"),
+		}).ServeHTTP)
+	})
 
 	server := http.Server{
 		Handler: mux,
