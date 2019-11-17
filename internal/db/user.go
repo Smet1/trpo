@@ -1,12 +1,15 @@
 package db
 
 import (
+	"database/sql"
 	"github.com/go-ozzo/ozzo-validation"
+	"github.com/jmoiron/sqlx"
+	"github.com/pkg/errors"
 	"time"
 )
 
 type User struct {
-	ID         int       `db:"id"`
+	ID         int64     `db:"id"`
 	Login      string    `db:"login"`
 	Password   string    `db:"password"`
 	Avatar     string    `db:"avatar"`
@@ -21,7 +24,28 @@ func (u *User) Validate() error {
 	)
 }
 
-func (u *User) Insert() {}
+func (u *User) Insert(db *sqlx.DB) error {
+	query := `
+INSERT INTO users (login, password, avatar, karma, registered) 
+VALUES (:login, :password, :avatar, :karma, :registered)
+RETURNING id
+`
+	row, err := db.NamedQuery(query, u)
+	if err != nil {
+		return errors.Wrap(err, "can't do query")
+	}
+	defer row.Close()
+
+	res := &sql.NullInt64{}
+	for row.Next() {
+		err = row.Scan(res)
+		if err != nil {
+			return errors.Wrap(err, "can't get id")
+		}
+	}
+
+	return nil
+}
 
 func (u *User) Select() {
 
