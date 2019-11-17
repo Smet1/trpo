@@ -2,14 +2,15 @@ package db
 
 import (
 	"context"
+	"net/http"
+	"net/url"
+
 	"github.com/Smet1/trpo/internal/config"
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"go.opencensus.io/plugin/ochttp"
-	"net/http"
-	"net/url"
 )
 
 type ctxdb struct{}

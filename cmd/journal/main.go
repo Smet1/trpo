@@ -3,11 +3,12 @@ package main
 import (
 	"context"
 	"flag"
-	"github.com/Smet1/trpo/internal/db"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/Smet1/trpo/internal/db"
 
 	"github.com/Smet1/trpo/internal/config"
 	"github.com/Smet1/trpo/internal/logger"

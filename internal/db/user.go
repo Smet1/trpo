@@ -2,10 +2,11 @@ package db
 
 import (
 	"database/sql"
-	"github.com/go-ozzo/ozzo-validation"
+	"time"
+
+	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
-	"time"
 )
 
 type User struct {
