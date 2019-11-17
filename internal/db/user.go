@@ -26,6 +26,7 @@ func (u *User) Validate() error {
 }
 
 func (u *User) Insert(db *sqlx.DB) error {
+	u.Registered = time.Now()
 	query := `
 INSERT INTO users (login, password, avatar, karma, registered) 
 VALUES (:login, :password, :avatar, :karma, :registered)
@@ -44,6 +45,8 @@ RETURNING id
 			return errors.Wrap(err, "can't get id")
 		}
 	}
+
+	u.ID = res.Int64
 
 	return nil
 }

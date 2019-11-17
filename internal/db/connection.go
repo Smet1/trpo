@@ -10,21 +10,12 @@ import (
 	"github.com/lib/pq"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"go.opencensus.io/plugin/ochttp"
 )
 
 type ctxdb struct{}
 
-func GetDbConnMiddleware(conn *sqlx.DB) func(http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return ochttp.Handler{
-			Handler: http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
-				ctx := context.WithValue(req.Context(), ctxdb{}, conn)
-
-				next.ServeHTTP(res, req.WithContext(ctx))
-			}),
-		}.Handler
-	}
+func WithLogger(ctx context.Context, conn *sqlx.DB) context.Context {
+	return context.WithValue(ctx, ctxdb{}, conn)
 }
 
 func GetConnection(ctx context.Context) *sqlx.DB {
@@ -33,6 +24,16 @@ func GetConnection(ctx context.Context) *sqlx.DB {
 		logrus.Fatal("can't get db connection")
 	}
 	return &l
+}
+
+func GetDbConnMiddleware(conn *sqlx.DB) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+			ctx := WithLogger(req.Context(), conn)
+
+			next.ServeHTTP(res, req.WithContext(ctx))
+		})
+	}
 }
 
 func EnsureDBConn(config *config.Config) (*sqlx.DB, error) {

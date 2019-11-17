@@ -6,7 +6,6 @@ import (
 	"os"
 
 	"github.com/sirupsen/logrus"
-	"go.opencensus.io/plugin/ochttp"
 )
 
 type ctxlog struct{}
@@ -30,12 +29,10 @@ func GetLogger(ctx context.Context) *logrus.Logger {
 // GetLoggerMiddleware get middleware for router with logger
 func GetLoggerMiddleware(log *logrus.Logger) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
-		return ochttp.Handler{
-			Handler: http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
-				ctx := WithLogger(req.Context(), log)
+		return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+			ctx := WithLogger(req.Context(), log)
 
-				next.ServeHTTP(res, req.WithContext(ctx))
-			}),
-		}.Handler
+			next.ServeHTTP(res, req.WithContext(ctx))
+		})
 	}
 }
