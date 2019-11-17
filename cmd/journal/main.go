@@ -3,16 +3,17 @@ package main
 import (
 	"context"
 	"flag"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+
 	"github.com/Smet1/trpo/internal/config"
 	"github.com/Smet1/trpo/internal/logger"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/onrik/logrus/filename"
 	"github.com/sirupsen/logrus"
-	"net/http"
-	"os"
-	"os/signal"
-	"syscall"
 )
 
 func main() {

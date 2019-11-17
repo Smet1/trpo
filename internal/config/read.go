@@ -1,9 +1,10 @@
 package config
 
 import (
+	"io/ioutil"
+
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
-	"io/ioutil"
 )
 
 func ReadConfig(fileName string, config interface{}) error {

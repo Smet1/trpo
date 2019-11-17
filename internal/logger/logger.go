@@ -2,10 +2,11 @@ package logger
 
 import (
 	"context"
-	"github.com/sirupsen/logrus"
-	"go.opencensus.io/plugin/ochttp"
 	"net/http"
 	"os"
+
+	"github.com/sirupsen/logrus"
+	"go.opencensus.io/plugin/ochttp"
 )
 
 type ctxlog struct{}
