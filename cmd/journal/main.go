@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"github.com/Smet1/trpo/internal/config"
+	"github.com/Smet1/trpo/internal/logger"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/onrik/logrus/filename"
@@ -37,6 +38,7 @@ func main() {
 
 	mux := chi.NewRouter()
 	mux.Use(middleware.NoCache)
+	mux.Use(logger.GetLoggerMiddleware(log))
 
 	server := http.Server{
 		Handler: mux,
