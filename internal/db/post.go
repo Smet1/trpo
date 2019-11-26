@@ -50,7 +50,7 @@ type Posts struct {
 
 func (p *Posts) Select(db *sqlx.DB, userID int64) error {
 	query := `
-SELECT (id, header, short_topic, main_topic, user_id, show, created)
+SELECT id, header, short_topic, main_topic, user_id, show, created
 FROM posts 
 WHERE user_id = $1
 `

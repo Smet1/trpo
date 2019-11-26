@@ -46,7 +46,7 @@ RETURNING id
 func (u *User) Select(db *sqlx.DB, login string) error {
 	u.Registered = time.Now()
 	query := `
-SELECT  (id, login, password, avatar, karma, registered)
+SELECT id, login, password, avatar, karma, registered
 FROM users 
 WHERE login = $1
 `

@@ -2,10 +2,11 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/Smet1/trpo/internal/logger"
-	"github.com/jmoiron/sqlx"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/Smet1/trpo/internal/logger"
+	"github.com/jmoiron/sqlx"
 
 	"github.com/Smet1/trpo/internal/db"
 )
