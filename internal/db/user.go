@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"time"
 
-	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 )
@@ -16,13 +15,6 @@ type User struct {
 	Avatar     string    `db:"avatar"`
 	Karma      float64   `db:"karma"`
 	Registered time.Time `db:"registered"`
-}
-
-func (u *User) Validate() error {
-	return validation.ValidateStruct(&u,
-		// Street cannot be empty, and the length must between 5 and 50
-		validation.Field(&u.Login, validation.Required, validation.Length(5, 50)),
-	)
 }
 
 func (u *User) Insert(db *sqlx.DB) error {
@@ -51,14 +43,17 @@ RETURNING id
 	return nil
 }
 
-func (u *User) Select() {
+func (u *User) Select(db *sqlx.DB, login string) error {
+	u.Registered = time.Now()
+	query := `
+SELECT  (id, login, password, avatar, karma, registered)
+FROM users 
+WHERE login = $1
+`
+	err := db.Get(u, query, login)
+	if err != nil {
+		return errors.Wrap(err, "can't do query")
+	}
 
-}
-
-func (u *User) Update() {
-
-}
-
-func (u *User) Delete() {
-
+	return nil
 }
