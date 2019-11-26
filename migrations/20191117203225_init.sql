@@ -19,4 +19,3 @@ CREATE TABLE IF NOT EXISTS users
 -- +goose StatementBegin
 DROP table users;
 -- +goose StatementEnd
--- SQL in this section is executed when the migration is rolled back.
