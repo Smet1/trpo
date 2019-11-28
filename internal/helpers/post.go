@@ -16,6 +16,7 @@ type Post struct {
 	MainTopic  string    `json:"main_topic,omitempty"`
 	Username   string    `json:"username,omitempty"`
 	Show       bool      `json:"show,omitempty"`
+	Tags       []string  `json:"tags,omitempty"`
 	Created    time.Time `json:"created,omitempty"`
 }
 

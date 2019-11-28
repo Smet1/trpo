@@ -17,6 +17,7 @@ type User struct {
 	Avatar     string
 	Karma      float64
 	Registered time.Time
+
 	Conn       *sqlx.DB
 }
 

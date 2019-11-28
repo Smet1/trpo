@@ -2,7 +2,6 @@ package db
 
 import (
 	"database/sql"
-
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 )
@@ -37,11 +36,38 @@ RETURNING id
 	return nil
 }
 
+func (t *Tag) LinkWithPost(db *sqlx.DB, postID int64) error {
+	query := `
+INSERT INTO post_tags (post_id, tag_id) 
+VALUES ($1, $2)
+`
+	_, err := db.Query(query, postID, t.ID)
+	if err != nil {
+		return errors.Wrap(err, "can't link post with tag")
+	}
+
+	return nil
+}
+
+func (t *Tag) FindByName(db *sqlx.DB, name string) error {
+	query := `
+SELECT id, name
+FROM tag 
+WHERE name = $1
+`
+	err := db.Get(t, query, name)
+	if err != nil {
+		return errors.Wrap(err, "can't do query")
+	}
+
+	return nil
+}
+
 type Tags struct {
 	Tags []*Tag
 }
 
-func (ts *Tags) Select(db *sqlx.DB, postID int64) error {
+func (ts *Tags) GetTagsByPostID(db *sqlx.DB, postID int64) error {
 	query := `
 SELECT t.id, t.name
 FROM post_tags
