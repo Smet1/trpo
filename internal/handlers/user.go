@@ -68,3 +68,28 @@ func (uh *User) GetUser(res http.ResponseWriter, req *http.Request) {
 	helpers.Response(res, http.StatusOK, user.ToResponse())
 	return
 }
+
+func (uh *User) Auth(res http.ResponseWriter, req *http.Request) {
+	log := logger.GetLogger(req.Context())
+
+	input := &helpers.User{}
+	err := input.ParseFromRequest(req.Body)
+	if err != nil {
+		log.WithError(err).Error("wrong request body")
+
+		helpers.Response(res, http.StatusBadRequest, helpers.Error{Error: err.Error()})
+		return
+	}
+	defer req.Body.Close()
+
+	user := &domain.User{Conn: uh.Conn}
+
+	_, err = user.Auth(input.Login, input.Password)
+	if err != nil {
+		helpers.Response(res, http.StatusBadRequest, helpers.Error{Error: "wrong password or login"})
+		return
+	}
+
+	helpers.Response(res, http.StatusOK, user.ToResponse())
+	return
+}
