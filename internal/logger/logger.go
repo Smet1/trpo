@@ -12,7 +12,7 @@ type ctxlog struct{}
 
 // WithLogger put logger to context
 func WithLogger(ctx context.Context, logger *logrus.Logger) context.Context {
-	return context.WithValue(ctx, ctxlog{}, logger)
+	return context.WithValue(ctx, ctxlog{}, *logger)
 }
 
 // GetLogger get logger from context

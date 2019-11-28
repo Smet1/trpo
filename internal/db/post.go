@@ -68,7 +68,7 @@ SELECT id, header, short_topic, main_topic, user_id, show, created
 FROM posts 
 WHERE user_id = $1
 `
-	err := db.Select(p.Posts, query)
+	err := db.Select(&p.Posts, query, userID)
 	if err != nil {
 		return errors.Wrap(err, "can't do query")
 	}

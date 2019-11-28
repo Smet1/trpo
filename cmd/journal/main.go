@@ -53,16 +53,16 @@ func main() {
 	mux.Use(db.GetDbConnMiddleware(conn))
 
 	mux.Route("/api", func(r chi.Router) {
-		mux.Route("/users", func(r chi.Router) {
+		r.Route("/users", func(r chi.Router) {
 			r.Post("/", handlers.GetCreateUserHandler(conn).ServeHTTP)
 			r.Get("/{username}", handlers.GetGetUserHandler(conn).ServeHTTP)
 		})
 
-		mux.Route("/posts", func(r chi.Router) {
-			r.Post("/", handlers.GetGetPostHandler(conn).ServeHTTP)
+		r.Route("/posts", func(r chi.Router) {
+			r.Post("/", handlers.GetCreatePostHandler(conn).ServeHTTP)
 			r.Get("/{post_id}", handlers.GetGetPostHandler(conn).ServeHTTP)
+			r.Get("/", handlers.GetGetPostsHandler(conn).ServeHTTP)
 		})
-
 	})
 
 	server := http.Server{

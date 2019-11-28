@@ -10,6 +10,7 @@ type Error struct {
 }
 
 func Response(res http.ResponseWriter, status int, body interface{}) {
+	res.Header().Add("Content-Type", "application/json")
 	res.WriteHeader(status)
 	binary, err := json.Marshal(body)
 	if err != nil {
@@ -20,6 +21,4 @@ func Response(res http.ResponseWriter, status int, body interface{}) {
 	if err != nil {
 		return
 	}
-
-	res.Header().Set("Content-Type", "application/json")
 }

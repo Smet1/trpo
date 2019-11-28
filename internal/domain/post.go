@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"database/sql"
 	"time"
 
 	"github.com/Smet1/trpo/internal/db"
@@ -99,10 +100,12 @@ func (p *Post) FindByID(id int64) (*helpers.Post, error) {
 	tagsDB := db.Tags{}
 	err = tagsDB.GetTagsByPostID(p.Conn, id)
 	if err != nil {
-		return nil, errors.Wrap(err, "can't find post tags")
+		if err != sql.ErrNoRows {
+			return nil, errors.Wrap(err, "can't find post tags")
+		}
 	}
-
 	tags := make([]string, 0, len(tagsDB.Tags))
+
 	for _, tag := range tagsDB.Tags {
 		tags = append(tags, tag.Name)
 	}

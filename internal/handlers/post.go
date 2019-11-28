@@ -76,3 +76,28 @@ func GetGetPostHandler(conn *sqlx.DB) http.HandlerFunc {
 		return
 	}
 }
+
+func GetGetPostsHandler(conn *sqlx.DB) http.HandlerFunc {
+	return func(res http.ResponseWriter, req *http.Request) {
+		log := logger.GetLogger(req.Context())
+
+		username := req.URL.Query().Get("username")
+		if username == "" {
+			helpers.Response(res, http.StatusBadRequest, helpers.Error{Error: "username not provided"})
+			return
+		}
+
+		post := &domain.Post{Conn: conn}
+
+		posts, err := post.FindByUsername(username)
+		if err != nil {
+			log.WithError(err).Error("can't find posts")
+
+			helpers.Response(res, http.StatusBadRequest, helpers.Error{Error: err.Error()})
+			return
+		}
+
+		helpers.Response(res, http.StatusOK, posts)
+		return
+	}
+}

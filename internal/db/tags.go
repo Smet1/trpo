@@ -74,7 +74,7 @@ FROM post_tags
 LEFT JOIN tag t on post_tags.tag_id = t.id
 WHERE post_id = $1
 `
-	err := db.Select(ts.Tags, query)
+	err := db.Select(&ts.Tags, query, postID)
 	if err != nil {
 		return errors.Wrap(err, "can't do query")
 	}

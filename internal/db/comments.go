@@ -54,7 +54,7 @@ SELECT id, parent_id, user_id, post_id, payload, show, created
 FROM comments 
 WHERE user_id = $1
 `
-	err := db.Select(cs.Comments, query)
+	err := db.Select(&cs.Comments, query, userID)
 	if err != nil {
 		return errors.Wrap(err, "can't do query")
 	}
