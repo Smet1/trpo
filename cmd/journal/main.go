@@ -52,16 +52,19 @@ func main() {
 	mux.Use(logger.GetLoggerMiddleware(log))
 	mux.Use(db.GetDbConnMiddleware(conn))
 
+	ph := handlers.Posts{Conn: conn}
+	uh := handlers.User{Conn: conn}
+
 	mux.Route("/api", func(r chi.Router) {
 		r.Route("/users", func(r chi.Router) {
-			r.Post("/", handlers.GetCreateUserHandler(conn).ServeHTTP)
-			r.Get("/{username}", handlers.GetGetUserHandler(conn).ServeHTTP)
+			r.Post("/", uh.CreateUser)
+			r.Get("/{username}", uh.GetUser)
 		})
 
 		r.Route("/posts", func(r chi.Router) {
-			r.Post("/", handlers.GetCreatePostHandler(conn).ServeHTTP)
-			r.Get("/{post_id}", handlers.GetGetPostHandler(conn).ServeHTTP)
-			r.Get("/", handlers.GetGetPostsHandler(conn).ServeHTTP)
+			r.Post("/", ph.CreatePost)
+			r.Get("/{post_id}", ph.GetPost)
+			r.Get("/", ph.GetPosts)
 		})
 	})
 
