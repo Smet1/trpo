@@ -2,10 +2,11 @@ package helpers
 
 import (
 	"encoding/json"
-	"github.com/pkg/errors"
 	"io"
 	"io/ioutil"
 	"time"
+
+	"github.com/pkg/errors"
 )
 
 type User struct {

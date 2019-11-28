@@ -1,12 +1,13 @@
 package handlers
 
 import (
+	"net/http"
+
 	"github.com/Smet1/trpo/internal/domain"
 	"github.com/Smet1/trpo/internal/helpers"
 	"github.com/Smet1/trpo/internal/logger"
 	"github.com/go-chi/chi"
 	"github.com/jmoiron/sqlx"
-	"net/http"
 )
 
 func GetCreateUserHandler(conn *sqlx.DB) http.HandlerFunc {
@@ -22,8 +23,8 @@ func GetCreateUserHandler(conn *sqlx.DB) http.HandlerFunc {
 		}
 		defer req.Body.Close()
 
-		user := &domain.User{}
-		user.FromParsedRequest(input, conn)
+		user := &domain.User{Conn: conn}
+		user.FromParsedRequest(input)
 
 		err = user.Validate()
 		if err != nil {

@@ -1,8 +1,9 @@
 package domain
 
 import (
-	"github.com/Smet1/trpo/internal/helpers"
 	"time"
+
+	"github.com/Smet1/trpo/internal/helpers"
 
 	"github.com/Smet1/trpo/internal/db"
 	"github.com/jmoiron/sqlx"
@@ -19,15 +20,13 @@ type User struct {
 	Conn       *sqlx.DB
 }
 
-func (u *User) FromParsedRequest(parsed *helpers.User, conn *sqlx.DB) {
+func (u *User) FromParsedRequest(parsed *helpers.User) {
 	u.ID = parsed.ID
 	u.Login = parsed.Login
 	u.Password = parsed.Password
 	u.Avatar = parsed.Avatar
 	u.Karma = parsed.Karma
 	u.Registered = parsed.Registered
-
-	u.Conn = conn
 }
 
 func (u *User) ToResponse() *helpers.User {
@@ -76,7 +75,7 @@ func (u *User) Create() error {
 func (u *User) GetByUsername(username string) error {
 	userDB := db.User{}
 
-	err := userDB.Select(u.Conn, username)
+	err := userDB.GetUserByLogin(u.Conn, username)
 	if err != nil {
 		return errors.Wrap(err, "can't find user")
 	}
@@ -91,7 +90,7 @@ func (u *User) GetByUsername(username string) error {
 func (u *User) Find(login string) error {
 	userDB := db.User{}
 
-	err := userDB.Select(u.Conn, login)
+	err := userDB.GetUserByLogin(u.Conn, login)
 	if err != nil {
 		return errors.Wrap(err, "can't find user")
 	}

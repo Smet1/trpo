@@ -44,11 +44,25 @@ RETURNING id
 	return nil
 }
 
+func (p *Post) GetPostByID(db *sqlx.DB, id int64) error {
+	query := `
+SELECT id, header, short_topic, main_topic, user_id, show, created
+FROM posts 
+WHERE id = $1
+`
+	err := db.Get(p, query, id)
+	if err != nil {
+		return errors.Wrap(err, "can't do query")
+	}
+
+	return nil
+}
+
 type Posts struct {
 	Posts []*Post
 }
 
-func (p *Posts) Select(db *sqlx.DB, userID int64) error {
+func (p *Posts) GetPostsByUserID(db *sqlx.DB, userID int64) error {
 	query := `
 SELECT id, header, short_topic, main_topic, user_id, show, created
 FROM posts 
