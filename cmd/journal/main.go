@@ -33,6 +33,8 @@ func main() {
 	log := logrus.New()
 	log.AddHook(filenameHook)
 
+	log.Formatter = &logrus.JSONFormatter{}
+
 	cfg := &config.Config{}
 	err := config.ReadConfig(*configPath, &cfg)
 	if err != nil {
@@ -50,9 +52,17 @@ func main() {
 	mux.Use(logger.GetLoggerMiddleware(log))
 	mux.Use(db.GetDbConnMiddleware(conn))
 
-	mux.Route("/api/users", func(r chi.Router) {
-		r.Post("/", handlers.GetCreateUserHandler(conn).ServeHTTP)
-		r.Get("/{username}", handlers.GetGetUserHandler(conn).ServeHTTP)
+	mux.Route("/api", func(r chi.Router) {
+		mux.Route("/users", func(r chi.Router) {
+			r.Post("/", handlers.GetCreateUserHandler(conn).ServeHTTP)
+			r.Get("/{username}", handlers.GetGetUserHandler(conn).ServeHTTP)
+		})
+
+		mux.Route("/posts", func(r chi.Router) {
+			r.Post("/", handlers.GetGetPostHandler(conn).ServeHTTP)
+			r.Get("/{post_id}", handlers.GetGetPostHandler(conn).ServeHTTP)
+		})
+
 	})
 
 	server := http.Server{
@@ -61,7 +71,7 @@ func main() {
 	}
 
 	go func() {
-		log.Infof("syncing orders service started on port %s", cfg.ServeAddr)
+		log.Infof("ejournal backend service started on port %s", cfg.ServeAddr)
 		if err = server.ListenAndServe(); err != nil {
 			if err == http.ErrServerClosed {
 				log.Info("graceful shutdown")
