@@ -73,6 +73,21 @@ func (u *User) Create() error {
 	return nil
 }
 
+func (u *User) GetByUsername(username string) error {
+	userDB := db.User{}
+
+	err := userDB.Select(u.Conn, username)
+	if err != nil {
+		return errors.Wrap(err, "can't find user")
+	}
+
+	u.Login = username
+	u.Karma = userDB.Karma
+	u.Registered = userDB.Registered
+
+	return nil
+}
+
 func (u *User) Find(login string) error {
 	userDB := db.User{}
 

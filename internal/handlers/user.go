@@ -3,10 +3,10 @@ package handlers
 import (
 	"github.com/Smet1/trpo/internal/domain"
 	"github.com/Smet1/trpo/internal/helpers"
-	"net/http"
-
 	"github.com/Smet1/trpo/internal/logger"
+	"github.com/go-chi/chi"
 	"github.com/jmoiron/sqlx"
+	"net/http"
 )
 
 func GetCreateUserHandler(conn *sqlx.DB) http.HandlerFunc {
@@ -44,6 +44,26 @@ func GetCreateUserHandler(conn *sqlx.DB) http.HandlerFunc {
 		log.WithField("user", user).Info("user created")
 
 		helpers.Response(res, http.StatusCreated, user.ToResponse())
+		return
+	}
+}
+
+func GetGetUserHandler(conn *sqlx.DB) http.HandlerFunc {
+	return func(res http.ResponseWriter, req *http.Request) {
+		log := logger.GetLogger(req.Context())
+
+		username := chi.URLParam(req, "username") // from a route like /users/{username}
+		user := &domain.User{Conn: conn}
+
+		err := user.GetByUsername(username)
+		if err != nil {
+			log.WithError(err).Error("can't find user")
+
+			helpers.Response(res, http.StatusBadRequest, helpers.Error{Error: err.Error()})
+			return
+		}
+
+		helpers.Response(res, http.StatusOK, user.ToResponse())
 		return
 	}
 }
