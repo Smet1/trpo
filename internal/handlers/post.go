@@ -1,13 +1,14 @@
 package handlers
 
 import (
+	"net/http"
+	"strconv"
+
 	"github.com/Smet1/trpo/internal/domain"
 	"github.com/Smet1/trpo/internal/helpers"
 	"github.com/Smet1/trpo/internal/logger"
 	"github.com/go-chi/chi"
 	"github.com/jmoiron/sqlx"
-	"net/http"
-	"strconv"
 )
 
 type Posts struct {

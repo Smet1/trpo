@@ -18,7 +18,7 @@ type User struct {
 	Karma      float64
 	Registered time.Time
 
-	Conn       *sqlx.DB
+	Conn *sqlx.DB
 }
 
 func (u *User) FromParsedRequest(parsed *helpers.User) {

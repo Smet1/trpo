@@ -48,13 +48,28 @@ type Comments struct {
 	Comments []*Comment
 }
 
-func (cs *Comments) Select(db *sqlx.DB, userID int64) error {
+func (cs *Comments) GetByUserID(db *sqlx.DB, userID int64) error {
 	query := `
 SELECT id, parent_id, user_id, post_id, payload, show, created
 FROM comments 
 WHERE user_id = $1
 `
 	err := db.Select(&cs.Comments, query, userID)
+	if err != nil {
+		return errors.Wrap(err, "can't do query")
+	}
+
+	return nil
+}
+
+func (cs *Comments) GetByUsername(db *sqlx.DB, username string) error {
+	query := `
+SELECT c.id, c.parent_id, c.user_id, c.post_id, c.payload, c.show, c.created
+FROM comments AS c
+         JOIN users u on c.user_id = u.id
+WHERE u.login = $1 
+`
+	err := db.Select(&cs.Comments, query, username)
 	if err != nil {
 		return errors.Wrap(err, "can't do query")
 	}
