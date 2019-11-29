@@ -17,7 +17,7 @@ type Posts struct {
 
 func (ph *Posts) CreatePost(res http.ResponseWriter, req *http.Request) {
 	log := logger.GetLogger(req.Context())
-	input := &helpers.User{}
+	input := &helpers.Post{}
 	err := input.ParseFromRequest(req.Body)
 	if err != nil {
 		log.WithError(err).Error("wrong request body")
@@ -27,26 +27,18 @@ func (ph *Posts) CreatePost(res http.ResponseWriter, req *http.Request) {
 	}
 	defer req.Body.Close()
 
-	user := &domain.User{Conn: ph.Conn}
+	user := &domain.Post{Conn: ph.Conn}
 	user.FromParsedRequest(input)
-
-	err = user.Validate()
-	if err != nil {
-		log.WithError(err).Error("not valid data")
-
-		helpers.Response(res, http.StatusBadRequest, helpers.Error{Error: err.Error()})
-		return
-	}
 
 	err = user.Create()
 	if err != nil {
-		log.WithError(err).Error("can't create user")
+		log.WithError(err).Error("can't create post")
 
 		helpers.Response(res, http.StatusBadRequest, helpers.Error{Error: err.Error()})
 		return
 	}
 
-	log.WithField("user", user).Info("user created")
+	log.WithField("post", user).Info("post created")
 
 	helpers.Response(res, http.StatusCreated, user.ToResponse())
 	return
