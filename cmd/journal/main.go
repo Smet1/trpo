@@ -15,6 +15,7 @@ import (
 	"github.com/Smet1/trpo/internal/logger"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/cors"
 	"github.com/onrik/logrus/filename"
 	"github.com/sirupsen/logrus"
 )
@@ -51,6 +52,14 @@ func main() {
 	mux.Use(middleware.NoCache)
 	mux.Use(logger.GetLoggerMiddleware(log))
 	mux.Use(db.GetDbConnMiddleware(conn))
+	mux.Use(cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{http.MethodPost, http.MethodGet, http.MethodHead, http.MethodPatch, http.MethodPut},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token", "metadata"},
+		ExposedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token", "metadata"},
+		AllowCredentials: true,
+		MaxAge:           300,
+	}).Handler)
 
 	ph := handlers.Posts{Conn: conn}
 	uh := handlers.User{Conn: conn}
