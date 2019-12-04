@@ -69,10 +69,11 @@ func (p *Post) Create() error {
 	p.ID = postDB.ID
 	p.Created = postDB.Created
 
-	tagDB := &db.Tag{}
+	// tagDB := &db.Tag{}
 	validTags := make([]string, 0, len(p.Tags))
 	tagIDs := make([]int64, 0, len(p.Tags))
 	for _, tag := range p.Tags {
+		tagDB := &db.Tag{}
 		err := tagDB.FindByName(p.Conn, tag)
 		if err != nil {
 			return errors.Wrap(err, "can't find tag")

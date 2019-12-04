@@ -5,4 +5,4 @@ db:
   password: "password"
   name: 'trpo'
   ssl_mode: 'disable'
-  host: 'localhost:54320'
+  host: 'db-trpo:5432'
