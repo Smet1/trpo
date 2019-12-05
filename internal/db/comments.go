@@ -18,16 +18,32 @@ type Comment struct {
 	Created  time.Time `db:"created"`
 }
 
-func (c *Comment) Insert(db *sqlx.DB) error {
-	c.Created = time.Now()
+type Comments struct {
+	Comments []*Comment
+}
+
+type CommentTable struct {
+	db *sqlx.DB
+}
+
+func (ct *CommentTable) Insert(parentID, userID, postID int64, payload string, show bool) (*Comment, error) {
+	c := &Comment{
+		ParentID: parentID,
+		UserID:   userID,
+		PostID:   postID,
+		Payload:  payload,
+		Show:     show,
+		Created:  time.Now(),
+	}
+
 	query := `
 INSERT INTO comments (parent_id, user_id, post_id, payload, show, created) 
 VALUES (:parent_id, :user_id, :post_id, :payload, :show, :created)
 RETURNING id
 `
-	row, err := db.NamedQuery(query, c)
+	row, err := ct.db.NamedQuery(query, c)
 	if err != nil {
-		return errors.Wrap(err, "can't do query")
+		return nil, errors.Wrap(err, "can't do query")
 	}
 	defer row.Close()
 
@@ -35,44 +51,44 @@ RETURNING id
 	for row.Next() {
 		err = row.Scan(res)
 		if err != nil {
-			return errors.Wrap(err, "can't get id")
+			return nil, errors.Wrap(err, "can't get id")
 		}
 	}
 
 	c.ID = res.Int64
 
-	return nil
+	return c, nil
 }
 
-type Comments struct {
-	Comments []*Comment
-}
+func (ct *CommentTable) GetCommentsByUserID(userID int64) (*Comments, error) {
+	cs := &Comments{}
 
-func (cs *Comments) GetByUserID(db *sqlx.DB, userID int64) error {
 	query := `
 SELECT id, parent_id, user_id, post_id, payload, show, created
 FROM comments 
 WHERE user_id = $1
 `
-	err := db.Select(&cs.Comments, query, userID)
+	err := ct.db.Select(&cs.Comments, query, userID)
 	if err != nil {
-		return errors.Wrap(err, "can't do query")
+		return nil, errors.Wrap(err, "can't do query")
 	}
 
-	return nil
+	return cs, nil
 }
 
-func (cs *Comments) GetByUsername(db *sqlx.DB, username string) error {
+func (ct *CommentTable) GetCommentsByUsername(username string) (*Comments, error) {
+	cs := &Comments{}
+
 	query := `
 SELECT c.id, c.parent_id, c.user_id, c.post_id, c.payload, c.show, c.created
 FROM comments AS c
          JOIN users u on c.user_id = u.id
 WHERE u.login = $1 
 `
-	err := db.Select(&cs.Comments, query, username)
+	err := ct.db.Select(&cs.Comments, query, username)
 	if err != nil {
-		return errors.Wrap(err, "can't do query")
+		return nil, errors.Wrap(err, "can't do query")
 	}
 
-	return nil
+	return cs, nil
 }

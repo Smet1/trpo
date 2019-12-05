@@ -17,16 +17,27 @@ type User struct {
 	Registered time.Time `db:"registered"`
 }
 
-func (u *User) Insert(db *sqlx.DB) error {
-	u.Registered = time.Now()
+type UserTable struct {
+	db *sqlx.DB
+}
+
+func (ut *UserTable) Insert(login, password, avatar string, karma float64) (*User, error) {
+	u := &User{
+		Login:      login,
+		Password:   password,
+		Avatar:     avatar,
+		Karma:      karma,
+		Registered: time.Now(),
+	}
+
 	query := `
 INSERT INTO users (login, password, avatar, karma, registered) 
 VALUES (:login, :password, :avatar, :karma, :registered)
 RETURNING id
 `
-	row, err := db.NamedQuery(query, u)
+	row, err := ut.db.NamedQuery(query, u)
 	if err != nil {
-		return errors.Wrap(err, "can't do query")
+		return nil, errors.Wrap(err, "can't do query")
 	}
 	defer row.Close()
 
@@ -34,41 +45,43 @@ RETURNING id
 	for row.Next() {
 		err = row.Scan(res)
 		if err != nil {
-			return errors.Wrap(err, "can't get id")
+			return nil, errors.Wrap(err, "can't get id")
 		}
 	}
 
 	u.ID = res.Int64
 
-	return nil
+	return u, nil
 }
 
-func (u *User) GetUserByLogin(db *sqlx.DB, login string) error {
-	u.Registered = time.Now()
+func (ut *UserTable) GetUserByLogin(login string) (*User, error) {
+	u := &User{}
+
 	query := `
 SELECT id, login, password, avatar, karma, registered
 FROM users 
 WHERE login = $1
 `
-	err := db.Get(u, query, login)
+	err := ut.db.Get(u, query, login)
 	if err != nil {
-		return errors.Wrap(err, "can't do query")
+		return nil, errors.Wrap(err, "can't do query")
 	}
 
-	return nil
+	return u, nil
 }
 
-func (u *User) GetUserByID(db *sqlx.DB, id int64) error {
-	u.Registered = time.Now()
+func (ut *UserTable) GetUserByID(id int64) (*User, error) {
+	u := &User{}
+
 	query := `
 SELECT id, login, password, avatar, karma, registered
 FROM users 
 WHERE id = $1
 `
-	err := db.Get(u, query, id)
+	err := ut.db.Get(ut, query, id)
 	if err != nil {
-		return errors.Wrap(err, "can't do query")
+		return nil, errors.Wrap(err, "can't do query")
 	}
 
-	return nil
+	return u, nil
 }

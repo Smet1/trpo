@@ -18,16 +18,32 @@ type Post struct {
 	Created    time.Time `db:"created"`
 }
 
-func (p *Post) Insert(db *sqlx.DB) error {
-	p.Created = time.Now()
+type Posts struct {
+	Posts []*Post
+}
+
+type PostTable struct {
+	db *sqlx.DB
+}
+
+func (pt *PostTable) Insert(header, shortTopic, mainTopic string, userID int64, show bool) (*Post, error) {
+	p := &Post{
+		Header:     header,
+		ShortTopic: shortTopic,
+		MainTopic:  mainTopic,
+		UserID:     userID,
+		Show:       show,
+		Created:    time.Now(),
+	}
+
 	query := `
 INSERT INTO posts (header, short_topic, main_topic, user_id, show, created) 
 VALUES (:header, :short_topic, :main_topic, :user_id, :show, :created)
 RETURNING id
 `
-	row, err := db.NamedQuery(query, p)
+	row, err := pt.db.NamedQuery(query, p)
 	if err != nil {
-		return errors.Wrap(err, "can't do query")
+		return nil, errors.Wrap(err, "can't do query")
 	}
 	defer row.Close()
 
@@ -35,43 +51,43 @@ RETURNING id
 	for row.Next() {
 		err = row.Scan(res)
 		if err != nil {
-			return errors.Wrap(err, "can't get id")
+			return nil, errors.Wrap(err, "can't get id")
 		}
 	}
 
 	p.ID = res.Int64
 
-	return nil
+	return p, nil
 }
 
-func (p *Post) GetPostByID(db *sqlx.DB, id int64) error {
+func (pt *PostTable) GetPostByID(id int64) ([]*Post, error) {
+	p := &Posts{}
+
 	query := `
 SELECT id, header, short_topic, main_topic, user_id, show, created
 FROM posts 
 WHERE id = $1
 `
-	err := db.Get(p, query, id)
+	err := pt.db.Get(p, query, id)
 	if err != nil {
-		return errors.Wrap(err, "can't do query")
+		return nil, errors.Wrap(err, "can't do query")
 	}
 
-	return nil
+	return p.Posts, nil
 }
 
-type Posts struct {
-	Posts []*Post
-}
+func (pt *PostTable) GetPostsByUserID(userID int64) ([]*Post, error) {
+	p := &Posts{}
 
-func (p *Posts) GetPostsByUserID(db *sqlx.DB, userID int64) error {
 	query := `
 SELECT id, header, short_topic, main_topic, user_id, show, created
 FROM posts 
 WHERE user_id = $1
 `
-	err := db.Select(&p.Posts, query, userID)
+	err := pt.db.Select(&p.Posts, query, userID)
 	if err != nil {
-		return errors.Wrap(err, "can't do query")
+		return nil, errors.Wrap(err, "can't do query")
 	}
 
-	return nil
+	return p.Posts, nil
 }

@@ -53,7 +53,7 @@ func (p *Post) Create() error {
 		return errors.Wrap(err, "can't find post's creator")
 	}
 
-	postDB := &db.Post{
+	postDB := &db.PostTable{
 		Header:     p.Header,
 		ShortTopic: p.ShortTopic,
 		MainTopic:  p.MainTopic,
@@ -92,7 +92,7 @@ func (p *Post) Create() error {
 }
 
 func (p *Post) FindByID(id int64) (*helpers.Post, error) {
-	postDB := db.Post{}
+	postDB := db.PostTable{}
 	err := postDB.GetPostByID(p.Conn, id)
 	if err != nil {
 		return nil, errors.Wrap(err, "can't find post")

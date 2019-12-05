@@ -12,15 +12,23 @@ type Tag struct {
 	Name string `db:"name"`
 }
 
-func (t *Tag) Insert(db *sqlx.DB) error {
+type TagsTable struct {
+	db *sqlx.DB
+}
+
+func (tt *TagsTable) Insert(name string) (*Tag, error) {
+	t := &Tag{
+		Name: name,
+	}
+
 	query := `
 INSERT INTO tag (name) 
 VALUES (:name)
 RETURNING id
 `
-	row, err := db.NamedQuery(query, t)
+	row, err := tt.db.NamedQuery(query, tt)
 	if err != nil {
-		return errors.Wrap(err, "can't do query")
+		return t, errors.Wrap(err, "can'tt do query")
 	}
 	defer row.Close()
 
@@ -28,57 +36,64 @@ RETURNING id
 	for row.Next() {
 		err = row.Scan(res)
 		if err != nil {
-			return errors.Wrap(err, "can't get id")
+			return t, errors.Wrap(err, "can'tt get id")
 		}
 	}
 
 	t.ID = res.Int64
 
-	return nil
+	return t, nil
 }
 
-func (t *Tag) LinkWithPost(db *sqlx.DB, postID int64) error {
-	query := `
-INSERT INTO post_tags (post_id, tag_id) 
-VALUES ($1, $2)
-`
-	_, err := db.Query(query, postID, t.ID)
-	if err != nil {
-		return errors.Wrap(err, "can't link post with tag")
-	}
+func (tt *TagsTable) FindByName(name string) (*Tag, error) {
+	t := &Tag{}
 
-	return nil
-}
-
-func (t *Tag) FindByName(db *sqlx.DB, name string) error {
 	query := `
 SELECT id, name
 FROM tag 
 WHERE name = $1
 `
-	err := db.Get(t, query, name)
+	err := tt.db.Get(t, query, name)
 	if err != nil {
-		return errors.Wrap(err, "can't do query")
+		return t, errors.Wrap(err, "can'tt do query")
 	}
 
-	return nil
+	return t, nil
 }
 
 type Tags struct {
 	Tags []*Tag
 }
 
-func (ts *Tags) GetTagsByPostID(db *sqlx.DB, postID int64) error {
+type PostTagsTable struct {
+	db *sqlx.DB
+}
+
+func (ptt *PostTagsTable) LinkWithPost(postID, tagID int64) error {
+	query := `
+INSERT INTO post_tags (post_id, tag_id) 
+VALUES ($1, $2)
+`
+	_, err := ptt.db.Query(query, postID, tagID)
+	if err != nil {
+		return errors.Wrap(err, "can'tt link post with tag")
+	}
+
+	return nil
+}
+
+func (ptt *PostTagsTable) GetTagsByPostID(postID int64) ([]*Tag, error) {
+	tags := &Tags{}
 	query := `
 SELECT t.id, t.name
 FROM post_tags
 LEFT JOIN tag t on post_tags.tag_id = t.id
 WHERE post_id = $1
 `
-	err := db.Select(&ts.Tags, query, postID)
+	err := ptt.db.Select(tags, query, postID)
 	if err != nil {
-		return errors.Wrap(err, "can't do query")
+		return nil, errors.Wrap(err, "can't do query")
 	}
 
-	return nil
+	return tags.Tags, nil
 }
