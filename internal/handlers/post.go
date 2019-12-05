@@ -27,10 +27,10 @@ func (ph *Posts) CreatePost(res http.ResponseWriter, req *http.Request) {
 	}
 	defer req.Body.Close()
 
-	user := &domain.Post{Conn: ph.Conn}
+	user := &domain.Post{}
 	user.FromParsedRequest(input)
 
-	err = user.Create()
+	err = user.Create(ph.Conn)
 	if err != nil {
 		log.WithError(err).Error("can't create post")
 
@@ -56,9 +56,9 @@ func (ph *Posts) GetPost(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	post := &domain.Post{Conn: ph.Conn}
+	post := &domain.Post{}
 
-	posts, err := post.FindByID(int64(ID))
+	posts, err := post.FindByID(int64(ID), ph.Conn)
 	if err != nil {
 		log.WithError(err).Error("can't find post")
 
@@ -79,9 +79,9 @@ func (ph *Posts) GetPosts(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	post := &domain.Post{Conn: ph.Conn}
+	post := &domain.Post{}
 
-	posts, err := post.FindByUsername(username)
+	posts, err := post.FindByUsername(username, ph.Conn)
 	if err != nil {
 		log.WithError(err).Error("can't find posts")
 

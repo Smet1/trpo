@@ -23,7 +23,7 @@ type Posts struct {
 }
 
 type PostTable struct {
-	db *sqlx.DB
+	Conn *sqlx.DB
 }
 
 func (pt *PostTable) Insert(header, shortTopic, mainTopic string, userID int64, show bool) (*Post, error) {
@@ -41,7 +41,7 @@ INSERT INTO posts (header, short_topic, main_topic, user_id, show, created)
 VALUES (:header, :short_topic, :main_topic, :user_id, :show, :created)
 RETURNING id
 `
-	row, err := pt.db.NamedQuery(query, p)
+	row, err := pt.Conn.NamedQuery(query, p)
 	if err != nil {
 		return nil, errors.Wrap(err, "can't do query")
 	}
@@ -60,20 +60,20 @@ RETURNING id
 	return p, nil
 }
 
-func (pt *PostTable) GetPostByID(id int64) ([]*Post, error) {
-	p := &Posts{}
+func (pt *PostTable) GetPostByID(id int64) (*Post, error) {
+	p := &Post{}
 
 	query := `
 SELECT id, header, short_topic, main_topic, user_id, show, created
 FROM posts 
 WHERE id = $1
 `
-	err := pt.db.Get(p, query, id)
+	err := pt.Conn.Get(p, query, id)
 	if err != nil {
 		return nil, errors.Wrap(err, "can't do query")
 	}
 
-	return p.Posts, nil
+	return p, nil
 }
 
 func (pt *PostTable) GetPostsByUserID(userID int64) ([]*Post, error) {
@@ -84,7 +84,7 @@ SELECT id, header, short_topic, main_topic, user_id, show, created
 FROM posts 
 WHERE user_id = $1
 `
-	err := pt.db.Select(&p.Posts, query, userID)
+	err := pt.Conn.Select(&p.Posts, query, userID)
 	if err != nil {
 		return nil, errors.Wrap(err, "can't do query")
 	}

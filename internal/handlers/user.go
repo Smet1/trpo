@@ -26,7 +26,7 @@ func (uh *User) CreateUser(res http.ResponseWriter, req *http.Request) {
 	}
 	defer req.Body.Close()
 
-	user := &domain.User{Conn: uh.Conn}
+	user := &domain.User{}
 	user.FromParsedRequest(input)
 
 	err = user.Validate()
@@ -37,7 +37,7 @@ func (uh *User) CreateUser(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	err = user.Create()
+	err = user.Create(uh.Conn)
 	if err != nil {
 		log.WithError(err).Error("can't create user")
 
@@ -55,9 +55,9 @@ func (uh *User) GetUser(res http.ResponseWriter, req *http.Request) {
 	log := logger.GetLogger(req.Context())
 
 	username := chi.URLParam(req, "username") // from a route like /users/{username}
-	user := &domain.User{Conn: uh.Conn}
+	user := &domain.User{}
 
-	err := user.GetByUsername(username)
+	err := user.GetByUsername(username, uh.Conn)
 	if err != nil {
 		log.WithError(err).Error("can't find user")
 
@@ -82,9 +82,9 @@ func (uh *User) Auth(res http.ResponseWriter, req *http.Request) {
 	}
 	defer req.Body.Close()
 
-	user := &domain.User{Conn: uh.Conn}
+	user := &domain.User{}
 
-	_, err = user.Auth(input.Login, input.Password)
+	_, err = user.Auth(input.Login, input.Password, uh.Conn)
 	if err != nil {
 		helpers.Response(res, http.StatusBadRequest, helpers.Error{Error: "wrong password or login"})
 		return

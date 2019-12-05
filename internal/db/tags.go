@@ -13,7 +13,7 @@ type Tag struct {
 }
 
 type TagsTable struct {
-	db *sqlx.DB
+	Conn *sqlx.DB
 }
 
 func (tt *TagsTable) Insert(name string) (*Tag, error) {
@@ -26,7 +26,7 @@ INSERT INTO tag (name)
 VALUES (:name)
 RETURNING id
 `
-	row, err := tt.db.NamedQuery(query, tt)
+	row, err := tt.Conn.NamedQuery(query, t)
 	if err != nil {
 		return t, errors.Wrap(err, "can'tt do query")
 	}
@@ -53,7 +53,7 @@ SELECT id, name
 FROM tag 
 WHERE name = $1
 `
-	err := tt.db.Get(t, query, name)
+	err := tt.Conn.Get(t, query, name)
 	if err != nil {
 		return t, errors.Wrap(err, "can'tt do query")
 	}
@@ -66,7 +66,7 @@ type Tags struct {
 }
 
 type PostTagsTable struct {
-	db *sqlx.DB
+	Conn *sqlx.DB
 }
 
 func (ptt *PostTagsTable) LinkWithPost(postID, tagID int64) error {
@@ -74,7 +74,7 @@ func (ptt *PostTagsTable) LinkWithPost(postID, tagID int64) error {
 INSERT INTO post_tags (post_id, tag_id) 
 VALUES ($1, $2)
 `
-	_, err := ptt.db.Query(query, postID, tagID)
+	_, err := ptt.Conn.Query(query, postID, tagID)
 	if err != nil {
 		return errors.Wrap(err, "can'tt link post with tag")
 	}
@@ -90,7 +90,7 @@ FROM post_tags
 LEFT JOIN tag t on post_tags.tag_id = t.id
 WHERE post_id = $1
 `
-	err := ptt.db.Select(tags, query, postID)
+	err := ptt.Conn.Select(&tags.Tags, query, postID)
 	if err != nil {
 		return nil, errors.Wrap(err, "can't do query")
 	}

@@ -18,7 +18,7 @@ type User struct {
 }
 
 type UserTable struct {
-	db *sqlx.DB
+	Conn *sqlx.DB
 }
 
 func (ut *UserTable) Insert(login, password, avatar string, karma float64) (*User, error) {
@@ -35,7 +35,7 @@ INSERT INTO users (login, password, avatar, karma, registered)
 VALUES (:login, :password, :avatar, :karma, :registered)
 RETURNING id
 `
-	row, err := ut.db.NamedQuery(query, u)
+	row, err := ut.Conn.NamedQuery(query, u)
 	if err != nil {
 		return nil, errors.Wrap(err, "can't do query")
 	}
@@ -62,7 +62,7 @@ SELECT id, login, password, avatar, karma, registered
 FROM users 
 WHERE login = $1
 `
-	err := ut.db.Get(u, query, login)
+	err := ut.Conn.Get(u, query, login)
 	if err != nil {
 		return nil, errors.Wrap(err, "can't do query")
 	}
@@ -78,7 +78,7 @@ SELECT id, login, password, avatar, karma, registered
 FROM users 
 WHERE id = $1
 `
-	err := ut.db.Get(ut, query, id)
+	err := ut.Conn.Get(u, query, id)
 	if err != nil {
 		return nil, errors.Wrap(err, "can't do query")
 	}
