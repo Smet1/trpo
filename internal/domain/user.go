@@ -41,9 +41,9 @@ func (u *User) ToResponse() *helpers.User {
 
 func (u *User) Validate() error {
 	switch {
-	case len(u.Login) < 3:
+	case len([]rune(u.Login)) < 3:
 		return errors.New("login len < 3")
-	case len(u.Password) < 3:
+	case len([]rune(u.Password)) < 3:
 		return errors.New("password len < 3")
 	}
 
