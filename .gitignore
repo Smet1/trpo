@@ -1,4 +1,5 @@
-
+cover.out
+cover.out.tmp
 # Created by https://www.gitignore.io/api/go,macos,jetbrains+all,visualstudiocode
 # Edit at https://www.gitignore.io/?templates=go,macos,jetbrains+all,visualstudiocode
 
