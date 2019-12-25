@@ -2,8 +2,9 @@ package domain
 
 import (
 	"database/sql"
-	"github.com/jmoiron/sqlx"
 	"time"
+
+	"github.com/jmoiron/sqlx"
 
 	"github.com/Smet1/trpo/internal/db"
 	"github.com/Smet1/trpo/internal/helpers"
