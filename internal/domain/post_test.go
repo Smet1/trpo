@@ -1,10 +1,11 @@
 package domain
 
 import (
-	"github.com/Smet1/trpo/internal/helpers"
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/Smet1/trpo/internal/helpers"
 )
 
 func TestPost_ToResponse(t *testing.T) {
